@@ -809,7 +809,6 @@
 
   // ============ SERVICE WORKER (DÉSACTIVÉ V1) ============
   // En phase de dev, on supprime tout SW + caches pour éviter le code obsolète.
-  // Réactivable en V2 quand le code sera stable.
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
       const had = regs.length > 0;
@@ -819,9 +818,16 @@
             if (had) {
               console.log('🧹 SW + caches purgés, reload...');
               setTimeout(() => location.reload(), 300);
+            } else {
+              init(); // Pas de SW, initialiser l'app
             }
           });
+        } else {
+          init();
         }
       });
     });
+  } else {
+    init();
   }
+})();
