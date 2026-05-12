@@ -651,36 +651,50 @@
   }
 
   async function toggleEntity(entity, turnOn) {
-    let domain, service;
-    if (entity.type === 'climate') {
-      domain = 'climate';
-      service = turnOn ? 'turn_on' : 'turn_off';
-    } else if (entity.type === 'light' || entity.type === 'switch') {
-      domain = entity.type;
-      service = turnOn ? 'turn_on' : 'turn_off';
-    } else if (entity.type === 'input_boolean') {
-      domain = 'input_boolean';
-      service = turnOn ? 'turn_on' : 'turn_off';
-    } else {
-      return;
-    }
-    try {
-      await fetch(`${state.backendUrl}/api/ha/service`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': state.apiKey
-        },
-        body: JSON.stringify({
-          domain,
-          service,
-          target: { entity_id: entity.id }
-        })
-      });
-    } catch (err) {
-      alert('Erreur : ' + err.message);
-    }
+  let domain, service;
+
+  if (entity.type === 'climate') {
+    domain = 'climate';
+    service = turnOn ? 'turn_on' : 'turn_off';
+  } else if (entity.type === 'light' || entity.type === 'switch') {
+    domain = entity.type;
+    service = turnOn ? 'turn_on' : 'turn_off';
+  } else if (entity.type === 'input_boolean') {
+    domain = 'input_boolean';
+    service = turnOn ? 'turn_on' : 'turn_off';
+  } else {
+    return;
   }
+
+  try {
+    const res = await fetch(`${state.backendUrl}/api/ha/service`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': state.apiKey
+      },
+      body: JSON.stringify({
+        domain,
+        service,
+        target: { entity_id: entity.id },
+        data: {}
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || err.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json().catch(() => ({}));
+    console.log('✅ Toggle OK:', entity.id, domain, service, data);
+    return data;
+
+  } catch (err) {
+    console.error('❌ Toggle error:', entity.id, err);
+    alert(`Erreur sur ${entity.label} : ${err.message}`);
+  }
+}
 
   // ============ SETTINGS ============
   function openSettings() {
