@@ -807,15 +807,21 @@
     setupSpeechRecognition();
   }
 
-  // ============ SERVICE WORKER ============
+  // ============ SERVICE WORKER (DÉSACTIVÉ V1) ============
+  // En phase de dev, on supprime tout SW + caches pour éviter le code obsolète.
+  // Réactivable en V2 quand le code sera stable.
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(err => {
-        console.warn('SW registration failed:', err);
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      const had = regs.length > 0;
+      Promise.all(regs.map(r => r.unregister())).then(() => {
+        if (window.caches) {
+          caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
+            if (had) {
+              console.log('🧹 SW + caches purgés, reload...');
+              setTimeout(() => location.reload(), 300);
+            }
+          });
+        }
       });
     });
   }
-
-  // GO !
-  init();
-})();
