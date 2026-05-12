@@ -3,7 +3,7 @@
    Stratégie : cache-first pour l'app shell, network-only pour /api
    ============================================================ */
 
-const CACHE_NAME = 'nexus-v1.0.0';
+const CACHE_NAME = 'nexus-v1.0.1';
 const APP_SHELL = [
   '/',
   '/index.html',
