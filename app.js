@@ -26,76 +26,102 @@
     isSending: false
   };
 
-  // Entités clés à afficher dans le dashboard rapide
+  // ============================================================
+  // ⚙️ CONFIGURATION DES ENTITÉS
+  // Pour ajouter une entité : copie-colle une ligne en respectant le format
+  // Types supportés : 'climate', 'light', 'switch', 'sensor', 'input_boolean'
+  // ============================================================
+
+  // Dashboard rapide (cartes en haut de l'app, lecture rapide)
   const DASHBOARD_ENTITIES = [
-    { id: 'climate.clim_salon', label: 'Salon', type: 'climate' },
-    { id: 'climate.clim_chambre_matteo', label: 'Matteo', type: 'climate' },
-    { id: 'climate.clim_chambre_etage', label: 'Étage', type: 'climate' },
-    { id: 'climate.clim_chambre_parents', label: 'Parents', type: 'climate' },
-    { id: 'climate.clim_dressing', label: 'Dressing', type: 'climate' },
-    { id: 'sensor.thermostat_exterieur_temperature', label: 'Extérieur', type: 'sensor' }
+    { id: 'climate.clim_salon',                            label: 'Salon',     type: 'climate' },
+    { id: 'climate.clim_chambre_matteo',                   label: 'Matteo',    type: 'climate' },
+    { id: 'climate.clim_chambre_etage',                    label: 'Étage',     type: 'climate' },
+    { id: 'sensor.thermostat_chambre_parents_temperature', label: 'Parents',   type: 'sensor'  },
+    { id: 'sensor.thermostat_dressing_temperature',        label: 'Dressing',  type: 'sensor'  },
+    { id: 'sensor.thermostat_exterieur_temperature',       label: 'Extérieur', type: 'sensor'  }
   ];
 
-  // Pièces pour la vue détail
+  // Vue détail - pièces et entités à piloter
   const ROOMS = [
     {
       name: 'Salon',
       entities: [
-        { id: 'climate.clim_salon', type: 'climate', label: 'Climatisation' },
-        { id: 'light.lumiere_salon_table_2', type: 'light', label: 'Table' },
-        { id: 'light.salon_tele_groupe', type: 'light', label: 'TV' },
-        { id: 'light.led_tele', type: 'light', label: 'LED TV' }
+        { id: 'climate.clim_salon',                  type: 'climate', label: 'Climatisation' },
+        { id: 'light.lumiere_salon_table_2',         type: 'light',   label: 'Table' },
+        { id: 'light.salon_tele_groupe',             type: 'light',   label: 'TV' },
+        { id: 'light.led_tele',                      type: 'light',   label: 'LED TV' }
       ]
     },
     {
       name: 'Cuisine',
       entities: [
-        { id: 'light.lumiere_evier_2', type: 'light', label: 'Évier' },
-        { id: 'switch.lumiere_plafonnier_cuisine_switch_1', type: 'switch', label: 'Plafonnier' },
-        { id: 'switch.lumiere_hotte_switch_1', type: 'switch', label: 'Hotte' }
+        { id: 'light.lumiere_evier_2',                       type: 'light',  label: 'Évier' },
+        { id: 'switch.lumiere_plafonnier_cuisine_switch_1',  type: 'switch', label: 'Plafonnier' },
+        { id: 'switch.lumiere_hotte_switch_1',               type: 'switch', label: 'Hotte' }
+      ]
+    },
+    {
+      name: 'Entrée',
+      entities: [
+        { id: 'switch.lumiere_entree_switch_1',      type: 'switch', label: 'Lumière entrée' }
       ]
     },
     {
       name: 'Chambre Matteo',
       entities: [
-        { id: 'climate.clim_chambre_matteo', type: 'climate', label: 'Climatisation' },
-        { id: 'light.led_chambre_matteo', type: 'light', label: 'LED' }
-      ]
-    },
-    {
-      name: 'Chambre Parents',
-      entities: [
-        { id: 'climate.clim_chambre_parents', type: 'climate', label: 'Climatisation' },
-        { id: 'light.lumiere_chambre_parents', type: 'light', label: 'Plafonnier' },
-        { id: 'light.led_chambre_parents', type: 'light', label: 'LED' }
+        { id: 'climate.clim_chambre_matteo',         type: 'climate', label: 'Climatisation' },
+        { id: 'light.led_chambre_matteo',            type: 'light',   label: 'LED' }
       ]
     },
     {
       name: 'Chambre Étage',
       entities: [
-        { id: 'climate.clim_chambre_etage', type: 'climate', label: 'Climatisation' }
+        { id: 'climate.clim_chambre_etage',          type: 'climate', label: 'Climatisation' }
+      ]
+    },
+    {
+      name: 'Chambre Parents',
+      entities: [
+        { id: 'input_boolean.clim_parents',          type: 'input_boolean', label: 'Climatisation' },
+        { id: 'light.lumiere_chambre_parents',       type: 'light',         label: 'Plafonnier' },
+        { id: 'light.led_chambre_parents',           type: 'light',         label: 'LED' }
       ]
     },
     {
       name: 'Dressing',
       entities: [
-        { id: 'climate.clim_dressing', type: 'climate', label: 'Climatisation' },
-        { id: 'light.lumiere_dressing', type: 'light', label: 'Lumière' }
+        { id: 'input_boolean.clim_dressing_etat',    type: 'input_boolean', label: 'Climatisation' },
+        { id: 'light.lumiere_dressing',              type: 'light',         label: 'Lumière' }
+      ]
+    },
+    {
+      name: 'Salle de bain',
+      entities: [
+        { id: 'light.miroirs_salle_de_bain',         type: 'light', label: 'Miroirs' }
+      ]
+    },
+    {
+      name: 'Escalier',
+      entities: [
+        { id: 'switch.lumiere_escalier_switch_1',    type: 'switch', label: 'Plafonnier' },
+        { id: 'light.led_escalier',                  type: 'light',  label: 'LED' },
+        { id: 'light.ampoules_escalier',             type: 'light',  label: 'Spots' }
       ]
     },
     {
       name: 'Couloirs',
       entities: [
-        { id: 'light.lumiere_couloir_rdc_groupe', type: 'light', label: 'Couloir RDC' },
-        { id: 'light.lsc_smart_gls_a60_10', type: 'light', label: 'Couloir étage' }
+        { id: 'light.lumiere_couloir_rdc_groupe',    type: 'light', label: 'Couloir RDC' },
+        { id: 'light.lsc_smart_gls_a60_10',          type: 'light', label: 'Couloir étage' }
       ]
     },
     {
       name: 'Extérieur',
       entities: [
-        { id: 'switch.lumiere_terrasse_droite_switch_1', type: 'switch', label: 'Terrasse droite' },
-        { id: 'switch.lumiere_terrasse_gauche_switch_1', type: 'switch', label: 'Terrasse gauche' },
-        { id: 'light.led_terrasse', type: 'light', label: 'LED terrasse' }
+        { id: 'switch.lumiere_terrasse_droite_switch_1',  type: 'switch', label: 'Terrasse droite' },
+        { id: 'switch.lumiere_terrasse_gauche_switch_1',  type: 'switch', label: 'Terrasse gauche' },
+        { id: 'light.led_terrasse',                       type: 'light',  label: 'LED terrasse' }
       ]
     }
   ];
@@ -631,6 +657,9 @@
       service = turnOn ? 'turn_on' : 'turn_off';
     } else if (entity.type === 'light' || entity.type === 'switch') {
       domain = entity.type;
+      service = turnOn ? 'turn_on' : 'turn_off';
+    } else if (entity.type === 'input_boolean') {
+      domain = 'input_boolean';
       service = turnOn ? 'turn_on' : 'turn_off';
     } else {
       return;
