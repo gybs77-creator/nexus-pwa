@@ -296,40 +296,63 @@
   }
 
   function appendMessage(role, content, imageDataUrl = null, save = true) {
-    // Retirer le welcome si présent
-    const welcome = els.chat.querySelector('.chat-welcome');
-    if (welcome) welcome.remove();
+  // Retirer le welcome si présent
+  const welcome = els.chat.querySelector('.chat-welcome');
+  if (welcome) welcome.remove();
 
-    const msg = document.createElement('div');
-    msg.className = `msg msg-${role}`;
-    if (role === 'assistant') {
-      msg.innerHTML = `
-        <div class="msg-avatar"><div class="logo-sm"></div></div>
+  const msg = document.createElement('div');
+  msg.className = `msg msg-${role}`;
+  
+  if (role === 'assistant') {
+    msg.innerHTML = `
+      <div class="msg-avatar"><div class="logo-sm"></div></div>
+      <div class="msg-content-wrapper">
         <div class="msg-content">${renderMarkdown(content)}</div>
-      `;
-    } else {
-      let html = '';
-      if (content) html += `<div>${escapeHtml(content).replace(/\n/g, '<br>')}</div>`;
-      if (imageDataUrl) html += `<img src="${imageDataUrl}" alt="Photo" />`;
-      msg.innerHTML = `<div class="msg-content">${html}</div>`;
-    }
-    els.chat.appendChild(msg);
-    scrollChatToBottom();
-
-    if (save) {
-      const conv = getCurrentConv();
-      if (conv) {
-        conv.messages.push({ role, content, image: imageDataUrl, ts: Date.now() });
-        // Auto-titre depuis le premier message user
-        if (conv.title === 'Nouvelle conversation' && role === 'user' && content) {
-          conv.title = content.slice(0, 40) + (content.length > 40 ? '…' : '');
-          renderConversations();
-        }
-        saveConversations();
-      }
-    }
-    return msg;
+        <button class="btn-copy" title="Copier" aria-label="Copier le message">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none"><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M15 3v2a2 2 0 0 1 2 2v11a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-4z"/></svg>
+        </button>
+      </div>
+    `;
+    
+    // Ajouter fonctionnalité copier
+    msg.querySelector('.btn-copy').addEventListener('click', () => {
+      const text = msg.querySelector('.msg-content').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = msg.querySelector('.btn-copy');
+        btn.classList.add('copied');
+        btn.title = '✅ Copié!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.title = 'Copier';
+        }, 2000);
+      }).catch(() => {
+        alert('Erreur copie');
+      });
+    });
+  } else {
+    let html = '';
+    if (content) html += `<div>${escapeHtml(content).replace(/\n/g, '<br>')}</div>`;
+    if (imageDataUrl) html += `<img src="${imageDataUrl}" alt="Photo" />`;
+    msg.innerHTML = `<div class="msg-content">${html}</div>`;
   }
+  
+  els.chat.appendChild(msg);
+  scrollChatToBottom();
+
+  if (save) {
+    const conv = getCurrentConv();
+    if (conv) {
+      conv.messages.push({ role, content, image: imageDataUrl, ts: Date.now() });
+      // Auto-titre depuis le premier message user
+      if (conv.title === 'Nouvelle conversation' && role === 'user' && content) {
+        conv.title = content.slice(0, 40) + (content.length > 40 ? '…' : '');
+        renderConversations();
+      }
+      saveConversations();
+    }
+  }
+  return msg;
+}
 
   function appendTyping() {
     const msg = document.createElement('div');
