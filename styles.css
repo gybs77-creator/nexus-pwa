@@ -537,7 +537,7 @@ input, textarea {
 }
 
 /* ---- COPIER BUTTON (TOUJOURS VISIBLE) ---- */
-.msg-content-container {
+.msg-content-wrapper {
   position: relative;
   display: flex;
   align-items: flex-start;
@@ -551,7 +551,7 @@ input, textarea {
   overflow-wrap: break-word;
 }
 
-.btn-copy-hover {
+.btn-copy {
   position: absolute;
   top: 4px;
   right: 4px;
@@ -571,13 +571,13 @@ input, textarea {
   pointer-events: auto;
 }
 
-.btn-copy-hover:hover {
+.btn-copy:hover {
   background: var(--bg-hover);
   color: var(--text);
   border-color: var(--border-strong);
 }
 
-.btn-copy-hover.copied {
+.btn-copy.copied {
   background: var(--accent-soft);
   color: var(--success);
   border-color: var(--success);
