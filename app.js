@@ -295,64 +295,79 @@
     scrollChatToBottom();
   }
 
-  function appendMessage(role, content, imageDataUrl = null, save = true) {
-  // Retirer le welcome si présent
-  const welcome = els.chat.querySelector('.chat-welcome');
-  if (welcome) welcome.remove();
+  // ============ FONCTION : AJOUTER BOUTONS COPIER SUR LES BLOCS CODE ============
+  function addCopyButtonsToCodeBlocks(msgElement) {
+    const preBlocks = msgElement.querySelectorAll('pre');
+    preBlocks.forEach(pre => {
+      const codeBlock = pre.querySelector('code');
+      if (!codeBlock) return;
 
-  const msg = document.createElement('div');
-  msg.className = `msg msg-${role}`;
-  
-  if (role === 'assistant') {
-    msg.innerHTML = `
-      <div class="msg-avatar"><div class="logo-sm"></div></div>
-      <div class="msg-content-wrapper">
-        <div class="msg-content">${renderMarkdown(content)}</div>
-        <button class="btn-copy" title="Copier" aria-label="Copier le message">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none"><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M15 3v2a2 2 0 0 1 2 2v11a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-4z"/></svg>
-        </button>
-      </div>
-    `;
-    
-    // Ajouter fonctionnalité copier
-    msg.querySelector('.btn-copy').addEventListener('click', () => {
-      const text = msg.querySelector('.msg-content').innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = msg.querySelector('.btn-copy');
-        btn.classList.add('copied');
-        btn.title = '✅ Copié!';
-        setTimeout(() => {
-          btn.classList.remove('copied');
-          btn.title = 'Copier';
-        }, 2000);
-      }).catch(() => {
-        alert('Erreur copie');
+      // Créer le bouton copier
+      const btn = document.createElement('button');
+      btn.className = 'btn-copy-code';
+      btn.title = 'Copier le code';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none"><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M15 3v2a2 2 0 0 1 2 2v11a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-4z"/></svg>';
+
+      // Event listener pour copier le code
+      btn.addEventListener('click', () => {
+        const text = codeBlock.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add('copied');
+          btn.title = '✓ Copié!';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.title = 'Copier le code';
+          }, 2000);
+        }).catch(() => {
+          alert('Erreur lors de la copie');
+        });
       });
-    });
-  } else {
-    let html = '';
-    if (content) html += `<div>${escapeHtml(content).replace(/\n/g, '<br>')}</div>`;
-    if (imageDataUrl) html += `<img src="${imageDataUrl}" alt="Photo" />`;
-    msg.innerHTML = `<div class="msg-content">${html}</div>`;
-  }
-  
-  els.chat.appendChild(msg);
-  scrollChatToBottom();
 
-  if (save) {
-    const conv = getCurrentConv();
-    if (conv) {
-      conv.messages.push({ role, content, image: imageDataUrl, ts: Date.now() });
-      // Auto-titre depuis le premier message user
-      if (conv.title === 'Nouvelle conversation' && role === 'user' && content) {
-        conv.title = content.slice(0, 40) + (content.length > 40 ? '…' : '');
-        renderConversations();
-      }
-      saveConversations();
-    }
+      // Ajouter le bouton au bloc pre
+      pre.style.position = 'relative';
+      pre.appendChild(btn);
+    });
   }
-  return msg;
-}
+
+  function appendMessage(role, content, imageDataUrl = null, save = true) {
+    // Retirer le welcome si présent
+    const welcome = els.chat.querySelector('.chat-welcome');
+    if (welcome) welcome.remove();
+
+    const msg = document.createElement('div');
+    msg.className = `msg msg-${role}`;
+
+    if (role === 'assistant') {
+      msg.innerHTML = `
+        <div class="msg-avatar"><div class="logo-sm"></div></div>
+        <div class="msg-content">${renderMarkdown(content)}</div>
+      `;
+      // Ajouter les boutons copier sur les blocs de code
+      addCopyButtonsToCodeBlocks(msg);
+    } else {
+      let html = '';
+      if (content) html += `<div>${escapeHtml(content).replace(/\n/g, '<br>')}</div>`;
+      if (imageDataUrl) html += `<img src="${imageDataUrl}" alt="Photo" />`;
+      msg.innerHTML = `<div class="msg-content">${html}</div>`;
+    }
+
+    els.chat.appendChild(msg);
+    scrollChatToBottom();
+
+    if (save) {
+      const conv = getCurrentConv();
+      if (conv) {
+        conv.messages.push({ role, content, image: imageDataUrl, ts: Date.now() });
+        // Auto-titre depuis le premier message user
+        if (conv.title === 'Nouvelle conversation' && role === 'user' && content) {
+          conv.title = content.slice(0, 40) + (content.length > 40 ? '…' : '');
+          renderConversations();
+        }
+        saveConversations();
+      }
+    }
+    return msg;
+  }
 
   function appendTyping() {
     const msg = document.createElement('div');
@@ -674,50 +689,50 @@
   }
 
   async function toggleEntity(entity, turnOn) {
-  let domain, service;
+    let domain, service;
 
-  if (entity.type === 'climate') {
-    domain = 'climate';
-    service = turnOn ? 'turn_on' : 'turn_off';
-  } else if (entity.type === 'light' || entity.type === 'switch') {
-    domain = entity.type;
-    service = turnOn ? 'turn_on' : 'turn_off';
-  } else if (entity.type === 'input_boolean') {
-    domain = 'input_boolean';
-    service = turnOn ? 'turn_on' : 'turn_off';
-  } else {
-    return;
-  }
-
-  try {
-    const res = await fetch(`${state.backendUrl}/api/ha/service`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': state.apiKey
-      },
-      body: JSON.stringify({
-        domain,
-        service,
-        target: { entity_id: entity.id },
-        data: {}
-      })
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || err.message || `HTTP ${res.status}`);
+    if (entity.type === 'climate') {
+      domain = 'climate';
+      service = turnOn ? 'turn_on' : 'turn_off';
+    } else if (entity.type === 'light' || entity.type === 'switch') {
+      domain = entity.type;
+      service = turnOn ? 'turn_on' : 'turn_off';
+    } else if (entity.type === 'input_boolean') {
+      domain = 'input_boolean';
+      service = turnOn ? 'turn_on' : 'turn_off';
+    } else {
+      return;
     }
 
-    const data = await res.json().catch(() => ({}));
-    console.log('✅ Toggle OK:', entity.id, domain, service, data);
-    return data;
+    try {
+      const res = await fetch(`${state.backendUrl}/api/ha/service`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': state.apiKey
+        },
+        body: JSON.stringify({
+          domain,
+          service,
+          target: { entity_id: entity.id },
+          data: {}
+        })
+      });
 
-  } catch (err) {
-    console.error('❌ Toggle error:', entity.id, err);
-    alert(`Erreur sur ${entity.label} : ${err.message}`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || err.message || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json().catch(() => ({}));
+      console.log('✅ Toggle OK:', entity.id, domain, service, data);
+      return data;
+
+    } catch (err) {
+      console.error('❌ Toggle error:', entity.id, err);
+      alert(`Erreur sur ${entity.label} : ${err.message}`);
+    }
   }
-}
 
   // ============ SETTINGS ============
   function openSettings() {
