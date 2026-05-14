@@ -535,12 +535,13 @@ input, textarea {
   0%, 60%, 100% { opacity: 0.3; }
   30% { opacity: 1; }
 }
-/* ---- COPIER BUTTON (NEW) ---- */
-.msg-content-wrapper {
+
+/* ---- COPIER BUTTON (TOUJOURS VISIBLE) ---- */
+.msg-content-container {
   position: relative;
   display: flex;
-  gap: 8px;
   align-items: flex-start;
+  gap: 8px;
 }
 
 .msg-content {
@@ -550,36 +551,42 @@ input, textarea {
   overflow-wrap: break-word;
 }
 
-.btn-copy {
-  flex-shrink: 0;
-  background: transparent;
-  border: none;
-  color: var(--text-faint);
+.btn-copy-hover {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  opacity: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  opacity: 0.6;
-  transition: opacity 0.2s, background 0.2s;
-  margin-top: 2px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  transition: background 0.2s, color 0.2s;
+  pointer-events: auto;
 }
 
-.btn-copy:hover {
-  opacity: 1;
+.btn-copy-hover:hover {
   background: var(--bg-hover);
-  color: var(--text-muted);
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 
-.btn-copy.copied {
+.btn-copy-hover.copied {
+  background: var(--accent-soft);
   color: var(--success);
-  opacity: 1;
+  border-color: var(--success);
 }
 
 .msg-content * {
   user-select: text;
 }
+
 /* ============ COMPOSER ============ */
 .composer {
   padding: 10px 14px 16px;
